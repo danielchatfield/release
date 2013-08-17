@@ -35,7 +35,7 @@ module.exports = function (grunt) {
       },
       bin: {
         files: '<%= jshint.bin.src %>',
-        tasks: ['jshint:bin', 'nodeunit']
+        tasks: ['jshint:bin']
       },
       test: {
         files: '<%= jshint.test.src %>',
