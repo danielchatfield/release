@@ -2,7 +2,6 @@
 'use strict';
 var os = require('os');
 var chalk = require('chalk');
-var colors = require('colors');
 var Insight = require('insight');
 var pkg = require('../package.json');
 var cli = require('../lib/release.js');
@@ -12,7 +11,7 @@ var notifier = require('update-notifier')({
 var optimist = require('optimist');
 var argv = optimist.argv;
 
-optimist.usage(chalk.cyan('Release') + ' is a small CLI utility to make releasing npm, PyPI \nand bower components easy.\n\n ' + chalk.cyan('Usage') + ': release ' + chalk.bold.magenta('[<version> | major | minor | patch]') + '\n\n If a version is specified then that version will be released.\n If major, minor or patch is passed then the existing version\n number will be bumped accordingly.');
+optimist.usage(chalk.cyan('Release') + ' is a small CLI utility to make releasing npm, PyPI \nand bower components easy.\n\n ' + chalk.cyan('Usage') + ': release ' + chalk.magenta('[<version> | major | minor | patch]') + '\n\n If a version is specified then that version will be released.\n If major, minor or patch is passed then the existing version\n number will be bumped accordingly.');
 
 var insight = new Insight({
   trackingCode: 'UA-43097923-2',
@@ -20,18 +19,31 @@ var insight = new Insight({
   packageVersion: pkg.version
 });
 
-if(insight.optOut === undefined) {
-  insight.askPermission();
+var run = function () {
+  /*
+    insight.askPermission isn't blocking so we have to wrap everything in a function and pass it as a callback
+  */
+
+  if(notifier.update) {
+    insight.track('actions','notify-update');
+    notifier.notify(true);
+  }
+
+  if(argv.help || argv.usage) {
+    return console.log(optimist.help());
+  }
+
+  
+};
+
+var afterPermission = function () {
   insight.track('downloaded');
   insight.track('platform', os.type(), os.release() );
-}
+  run();
+};
 
-if(notifier.update) {
-  insight.track('actions','notify-update');
-  notifier.notify(true);
+if(insight.optOut === undefined) {
+  insight.askPermission(null, afterPermission);
+} else {
+  run();
 }
-
-if(argv.help || argv.usage) {
-  return console.log(optimist.help());
-}
-
