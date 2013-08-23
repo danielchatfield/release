@@ -55,11 +55,11 @@ var run = function () {
   var release = new Release(process.cwd(), options);
 
   if(argv.show) {
-    return release.currentVersion();
+    return release.getVersion();
   }
 
   if(argv.version) {
-    return release.release(argv.version);
+    return release.version(argv.version);
   }
 
   release.throwError("No parameters supplied");
