@@ -5,14 +5,25 @@ var os = require('os');
 var chalk = require('chalk');
 var Insight = require('insight');
 var pkg = require('../package.json');
-var release = require('../lib/release.js').run;
+var Release = require('../lib/release.js');
 var notifier = require('update-notifier')({
   packagePath: '../package.json'
 });
 var optimist = require('optimist');
 var argv = optimist.argv;
 
-optimist.usage(chalk.cyan('Release') + ' is a small CLI utility to make releasing npm, PyPI \nand bower components easy.\n\n ' + chalk.cyan('Usage') + ': release ' + chalk.magenta('[<version> | major | minor | patch]') + '\n\n If a version is specified then that version will be released.\n If major, minor or patch is passed then the existing version\n number will be bumped accordingly.');
+optimist.string('version')    .describe('version', 'Releases the specified version')
+        .boolean('prerelease').describe('prerelease', 'Bumps the prerelease version number')
+        .boolean('patch')     .describe('patch', 'Bumps the patch version number')
+        .boolean('minor')     .describe('minor', 'Bumps the minor version number')
+        .boolean('major')     .describe('major', 'Bumps the major version number')
+        .boolean('show')      .describe('show', 'Shows the current version number')
+        .boolean('debug')     .describe('debug', 'Enable debug messages')
+        .alias('v', 'version')
+        .alias('verbose', 'debug')
+;
+
+optimist.usage(chalk.cyan('Release') + ' is a small CLI utility to make releasing npm, PyPI \nand bower components easy.\n\n ' + chalk.cyan('Usage') + ': release ' + chalk.magenta('[args]') + '\n\n If a version is specified then that version will be released.\n If major, minor or patch is passed then the existing version\n number will be bumped accordingly.');
 
 var insight = new Insight({
   trackingCode: 'UA-43097923-2',
@@ -31,13 +42,27 @@ var run = function () {
     notifier.notify(true);
   }
 
-  if(argv.help || argv.usage || argv._.length === 0) {
+  if(argv.help || argv.usage) {
     return console.log(optimist.help());
   }
 
-  var version = argv._[0];
   
-  release(version);  
+
+  var options = {
+    debug: argv.debug || argv.verbose,
+    displayOutput: true
+  };
+  var release = new Release(process.cwd(), options);
+
+  if(argv.show) {
+    return release.currentVersion();
+  }
+
+  if(argv.version) {
+    return release.release(argv.version);
+  }
+
+  release.throwError("No parameters supplied");
 };
 
 var afterPermission = function () {

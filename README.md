@@ -1,5 +1,4 @@
 # release
-
 [![Build Status](https://secure.travis-ci.org/danielchatfield/release.png?branch=master)](http://travis-ci.org/danielchatfield/release)
 [![Dependency Status](https://gemnasium.com/danielchatfield/release.png)](https://gemnasium.com/danielchatfield/release) 
 [![NPM version](https://badge.fury.io/js/release.png)](http://badge.fury.io/js/release)
